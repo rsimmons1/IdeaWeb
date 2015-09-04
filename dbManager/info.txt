@@ -1,0 +1,20 @@
+webIp = '104.131.67.157'; port = 40000
+
+***** = DONE
+; = In Progress
+
+Work-List:
+	DONE
+		-Host MongoDB on JA's Server *****
+		-Apply new HTTP response system *****
+		-Fix Node Generator redirect Issue ******
+
+	TODO
+		-Export DB to new Server;
+		-Host project on heroku;
+		-Fix new HTTP issue (missing page crash);
+		-Fix SearchBar highlighting issue;
+
+	THINK ABOUT
+		-Fix link limit issue;
+		-Possibly switch from MediaWikiApi;

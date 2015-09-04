@@ -1,8 +1,8 @@
 #!/usr/bin/python
 from pymongo import MongoClient
 from collections import deque
-def connect(dbName,colName):
-	client = MongoClient()
+def connect(dbName,colName,website=None,port=None):
+	client = MongoClient(website,port)
 	db = client[dbName]
 	return db[colName]
 

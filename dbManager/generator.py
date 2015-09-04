@@ -1,12 +1,18 @@
 import articleparser as ap
 import Connect
 import json
+import sys
 globalCount = 0
-collection = Connect.connect('wikiGraph','articleNodesTest')
 
+# if not len(sys.argv) > 1:
+# 	collection = Connect.connect('wikiGraph','articleNodesTest')
+# 	ap.collection = collection
+# else:
+# 	collection = Connect.connect('wikiGraph','articleNodesTest',sys.argv[1],int(sys.argv[2]))
+# 	ap.collection = collection
+	
+collection = Connect.connect('wikiGraph','articleNodesTest','104.131.67.157',40000)
 #generateNode takes in the name(string) of the node and outputs a node object
-
-
 #main
 library = open("library.json","w+")
 while (True):
@@ -14,16 +20,14 @@ while (True):
 	if ("addnode" in search):
 		searchParam = search.split()
 		globalCount = int(searchParam[2])
-		ap.makeGraph(ap.generateNode(searchParam[1].replace("_"," ")),int(searchParam[2]),globalCount)
+		ap.makeGraph(ap.generateNode(searchParam[1].replace("_"," ")),int(searchParam[2]))
 	elif ("test" in search):
 		searchParam = search.split()
 		ap.makeNode(ap.generateNode(searchParam[1].replace("_"," ")))
-	# elif ("expand" in search):
-	# 	searchParam = search.split()
-	# 	globalCount = int(searchParam[1])
-	# 	for x in range(int(searchParam[2])):
-	# 		thread.start_new_thread(expand,tuple([int(searchParam[1])]))
-	# 		time.sleep(1)
+	elif ("expand" in search):
+		searchParam = search.split()
+		globalCount = int(searchParam[1])
+		ap.expand(globalCount)
 	elif('path' in search):
 		searchParam = search.split()
 		print ap.find_path(searchParam[1],searchParam[2])

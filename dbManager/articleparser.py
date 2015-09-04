@@ -3,49 +3,27 @@ import requests
 import commonwords
 import time
 import Connect
+import sys
+import httplib
+import random
+collection = Connect.connect('wikiGraph','articleNodesTest','104.131.67.157',40000)
 
-collection = Connect.connect('wikiGraph','articleNodesTest')
-def linkHandler(articleTitles):
-	url = 'https://en.wikipedia.org/w/api.php?action=query&prop=extracts|links&format=json&explaintext=&pllimit=max&titles='+'|'.join(articleTitles)+'&redirects='
-	jsonInfo = requests.get(url).json()
-	articles = {}
-	for item in jsonInfo['query']['pages']:
-		print item
-		pages = jsonInfo['query']['pages']
-		title = pages[item]['title']
-		articles[title] = {}
-		articles[title]['article'] = pages[item]['extract']
-		articles[title]['links'] = pages[item]['links']
-		articles[title]['title'] = pages[item]['title']
-	if 'redirects' in json['query']:
-		articles['redirects'] = jsonInfo['query']['redirects']
-	return articles
-
-def getArticle(name,articleList):
-	found =  False
-	for item in articleList:
-		if name.lower() == item.lower():
-			found = True
-			return articleList[item]
-	if not found:
-		for item in articleList['redirects']:
-			if name.lower() == item['from'].lower():
-				return articleList[item['to']]
-
-
-def generateNode(name):
+def generateNode(article,status='single'):
 	t1 = time.time()
-	url2 = 'https://en.wikipedia.org/w/api.php?action=query&prop=extracts|links&format=json&explaintext=&pllimit=max&titles='+name+'&redirects='
-	r = requests.get(url2)
-	r2 = r.json()
-	data = r2['query']['pages']
+	if status == 'single':
+		url2 = 'https://en.wikipedia.org/w/api.php?action=query&prop=extracts|links&format=json&explaintext=&pllimit=max&titles='+article+'&redirects='
+		r = requests.get(url2)
+		r2 = r.json()
+		data = r2['query']['pages']
+		datum = r2['query']
+	else:
+		data = article['query']['pages']
+		datum = article['query']
+	
 	Tkey = data.keys()
+	name = data[Tkey[0]]['title']
 	t2 = time.time()
 	finalNode = {}
-	print "CONNECTION TIME: "+str(t2 - t1)
-	if not 'pages' in r2['query'].keys():
-		print 'no pages'
-		return {}
 	if(Tkey[0] == "-1"):##Error Handling
 		print "noLink "+name
 		return finalNode
@@ -57,15 +35,14 @@ def generateNode(name):
 
 	info2 = info2.lower()
 	info2 = info2.encode('ascii',errors='ignore')
-	if 'redirects' in r2['query']:
-		links = getLinks(r2['query']['redirects'][0]['to'],data)
-	else:
-		links = getLinks(name,data)
+	links = getLinks(name,data)
 	infoArray = info2.split()
 	sortedLinks = []
 	wordScore = 0
 	finalNode['title'] = name
-	finalNode['save'] = name.upper()
+	finalNode['save'] = [name.upper()]
+	if 'redirects' in datum:
+		finalNode['save'].append(datum['redirects'][0]['from'].upper())
 	finalNode['edges'] = []
 	finalNode['scanned'] = False
 	connectionNum = 5
@@ -97,8 +74,6 @@ def generateNode(name):
 			fullNames.append(max(shortWords,key=(lambda x: x[1])))
 	fullNames.sort(key = lambda x: x[1],reverse=True)
 	time6 = time.time()
-	print "LINK SORTING TIME: "+str(time6 - time5)
-	print "TOTAL TIME: "+str(time6- t1)
 	finalNode['edges'] = fullNames
 	return finalNode
 
@@ -151,57 +126,83 @@ def find_path(graph,start, end, path=[],searches=[]):
 			return newpath
 	return None
 
-def makeNode(initialNode):
-	Tcount = 0
-	newConnect = ""
-	Ngraph = {}
-	found = False
-	time1 = 0
-	time2 = 0
-	time3 = 0
-	time4 = 0
-	time5 = 0
-	wasHere = ""
-	for query in initialNode['edges']:
-		time1 = time.time()
-		if not bool(collection.find_one({'save': query[0].upper()})):
-			time3 = time.time()
-			wasHere = ""
-			newNode = generateNode(query[0])
-			time4 = time.time()
-			if(bool(newNode)):
-				collection.insert_one(newNode)
-				time5 = time.time()
-		else:
-			wasHere = " IS ALREADY HERE ^$^$^$^"
-		time2 = time.time()
-		print str(query)+"TIMES; LOOKUP : %f, NODE GENERATION: %f, INSERTION: %f, TOTAL: %f " % ((time3 - time1), (time4 - time3),(time5 - time4),(time2 - time1))
-	#print json.dumps(Ngraph, indent=4, sort_keys=True)
+def linkHandler(articleTitles):
+	conn = httplib.HTTPSConnection("en.wikipedia.org")
+	articles = {}	
+	articles['redirects'] = {}
+	info = {}
+	for word in articleTitles:
+		print word+" linkHandler 1"
+		url = '/w/api.php?action=query&prop=extracts|links&format=json&explaintext=&pllimit=max&titles='+word+'&redirects='
+		conn.request("GET", url)
+		try:
+			r1 = conn.getresponse()
+			info = json.loads(r1.read())
+			data = info['query']['pages']
+			Tkey = data.keys()
+			if not info['query']['pages'].keys()[0] == "-1":
+				pages = info['query']['pages']
+				articles[word] = info
+				if 'redirects' in info['query']:
+					redirect = info['query']['redirects'][0]
+					articles['redirects'][redirect['from']] = redirect['to']
+		except:
+			conn = httplib.HTTPSConnection("en.wikipedia.org")
+	return articles
+
+def getArticle(name,articleList):
+	for word in articleList:
+		if word.lower() == name.lower():
+			article = articleList[word]
+			article['redirects'] = []
+			return articleList[word]
+	
+	for word in articleList['redirects']:
+		if word.lower() == name.lower():
+			article = articleList[articleList['redirects'][word]]
+			article['redirects'] = [word.upper()]
+			return article
+	return None
+
+def makeNode(initialNode,depth=None):
+	searchList = []
+	for query in initialNode['edges'][:depth]:
+		if  not bool(collection.find_one({'save': query[0].upper()})):
+			# print query[0]
+			searchList.append(query[0])
+	print len(searchList)
+	articles = linkHandler(searchList)
+	print articles.keys()
+	for query in articles:
+			article = getArticle(query,articles)
+			if 'query' in article:
+				newNode = generateNode(article,'multiple')
+				if(bool(newNode)):
+					collection.insert_one(newNode)
 
 def expand(counter):
-	bounce = collection.find_one({'scanned': False})
+	Tcount = 0
+	potentials = collection.find({'scanned': False})
+	number = random.randint(0,collection.find().count())
+	bounce = collection.find()[number]
 	print "REDIRECT "+str(bounce['title'])+" ***********************************"
 	del bounce['_id']
 	makeGraph(bounce,counter)
 
 
-def makeGraph(initialNode,counter,globalCount):
+def makeGraph(initialNode,globalCount,depth=None):
 	searches = []
-	Tgraph = {}
 	TNode = {}
 	dbNode = {}
-	alreadyHere = False
 	for item in initialNode['edges']:
 		searches.append(item)
 	while bool(searches):
-		alreadyHere = False
 		item = searches[0]
 		if globalCount < 1:
-			return Tgraph
+			return {}
 		dbNode = collection.find_one({'save': item[0].upper()})
 		if bool(dbNode):
 			TNode = dbNode
-			alreadyHere = True
 			print TNode['save']+" "+str(TNode['scanned'])+" "+str(globalCount)+" IS ALREADY HERE!!!!"
 			del TNode['_id']
 		else:
@@ -209,17 +210,16 @@ def makeGraph(initialNode,counter,globalCount):
 			print item[0]+" "+str(globalCount)+" New Connection *************"
 		if(bool(TNode)):
 			if not TNode['scanned']:
-				TNode['scanned'] = True
-				collection.update({'save':TNode['save']},{'$set':{'scanned':True} })
-				makeNode(TNode)
-				
-				for edge in TNode['edges']:
+				makeNode(TNode,depth)
+				if depth == None:
+					TNode['scanned'] = True
+					collection.update({'save':TNode['save']},{'$set':{'scanned':True} })
+				for edge in TNode['edges'][:depth]:
 					if not edge in searches:
 						searches.append(edge)
 				globalCount -= 1
 		searches.remove(item)
 		searches.sort(key=(lambda x: x[1]),reverse=True)
-		print str(searches)+" SEARCH LIST ********"
 	expand(globalCount)
 
 
