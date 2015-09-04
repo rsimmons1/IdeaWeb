@@ -1,9 +1,12 @@
 from django.shortcuts import render
 import json
-import Connect
 from dbManager import articleparser as parse
+from dbManager import Connect
+
 #from django_ajax.decorators import ajax
 # Create your views here.
+collection = Connect.connect('wikiGraph','articleNodesTest','104.131.67.157',40000)
+parse.collection = collection
 
 from django.http import HttpResponse
 
@@ -12,13 +15,13 @@ def index(request):
 
 #@ajax
 def ajax_request(request):
+	info = {}
 	query = request.GET.get('q','')
-	collections = Connect.connect('wikiGraph','articleNodesTest')
-	info = collections.find_one({'save':query.upper()})
-	if info:
+	
+	info = collection.find_one({'save':query.upper()})
+	if bool(info):
 		del info['_id']
 	else:
 		info = parse.generateNode(query)
-		collections.insert_one(info)
 	return HttpResponse(json.dumps(info))
 
