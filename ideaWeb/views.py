@@ -17,11 +17,15 @@ def index(request):
 def ajax_request(request):
 	info = {}
 	query = request.GET.get('q','')
-	
 	info = collection.find_one({'save':query.upper()})
 	if bool(info):
 		del info['_id']
+
 	else:
+		print "NewNode"
 		info = parse.generateNode(query)
+		if bool(info):
+			collection.insert_one(info)
+			del info['_id']
 	return HttpResponse(json.dumps(info))
 

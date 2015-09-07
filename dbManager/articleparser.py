@@ -7,7 +7,16 @@ import sys
 import httplib
 import random
 collection = Connect.connect('wikiGraph','articleNodesTest','104.131.67.157',40000)
-
+def connArticle(word):
+		url2 = 'https://en.wikipedia.org/w/api.php?action=query&prop=extracts|links&format=json&explaintext=&pllimit=max&titles='+word+'&redirects='
+		r = requests.get(url2)
+		r2 = r.json()
+		info = {}
+		data = r2['query']['pages']
+		Tkey = data.keys()
+		article = data[Tkey[0]]
+		return article
+	
 def generateNode(article,status='single'):
 	t1 = time.time()
 	if status == 'single':
@@ -170,7 +179,6 @@ def makeNode(initialNode,depth=None):
 		if  not bool(collection.find_one({'save': query[0].upper()})):
 			# print query[0]
 			searchList.append(query[0])
-	print len(searchList)
 	articles = linkHandler(searchList)
 	print articles.keys()
 	for query in articles:

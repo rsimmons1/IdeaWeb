@@ -6,24 +6,11 @@ def connect(dbName,colName,website=None,port=None):
 	db = client[dbName]
 	return db[colName]
 
-def find_path(collection,start, end, path=[],searches=[]):
-	Node = {}
-	if searches:
-		del searches[0]
-	print start
-	path = path + [start.lower()]
-	Node = collection.find_one({'save':start.upper()})
-	newpath = []
-	if start.lower() == end.lower():
-		return path
-	if bool(Node):
-		searches += Node['edges'][:5]
-	for edge in searches:
-		if not edge[0].lower() in path and not edge[0].lower() in searches:
-			newpath = find_path(collection,searches[0][0], end, path)
-		if newpath: 
-			return newpath
-	return None
+def neighbors(node,depth=5):
+	return map(lambda x: x[0],node['edges'][:depth])
+
+def find(word,graph):
+	return graph.find_one({'save':word.upper()})
 
 def breadth_first_search(graph, start, goal,depth=5):
     frontier = deque()
@@ -36,19 +23,28 @@ def breadth_first_search(graph, start, goal,depth=5):
         current = frontier.popleft()
         path.append(current)
         if current.lower() == goal.lower():
-            break
-        edges = graph.find_one({'save':current.upper()})
+            return came_from
+        edges = neighbors(find(current))
         if bool(edges):
-	        for next in edges['edges'][:depth]:
-	            if next[0] not in came_from:
-	                frontier.append(next[0])
-	                came_from[next[0]] = current
-	            if next[0].lower() == goal.lower():
+	        for next in edges:
+	            if next not in came_from:
+	                frontier.append(next)
+	                came_from[next] = current
+	            if next.lower() == goal.lower():
+	            	came_from[next] = current
 	            	path.append(goal)
 	            	found = True
-	            	break
+	            	return came_from
+    return None
     
-    return came_from
+
+def exact_path(graph,start,end,path=[]):
+	if start.lower() == end.lower():
+		return path
+	for item in graph:
+		if item.lower() == end.lower():
+			path.append(item)
+			return exact_path(graph,start,graph[item])
 
 
 
