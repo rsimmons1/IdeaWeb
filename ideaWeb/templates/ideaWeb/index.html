@@ -4,55 +4,120 @@
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.7.0/vis.min.js"></script>
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.7.0/vis.min.css" rel="stylesheet" type="text/css" />
-	
-	<style type="text/css">
-	    #mynetwork {
-	      width: 1000px;
-	      height: 600px;
-	      background: #000000;
-	      border: 1px solid lightgray;
-	    }
-  	</style>
+
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Arvo">
+
+	<link rel="stylesheet" type="text/css" href="{% static 'ideaWeb/css/jquery.fullPage.css' %}" />
+	<script src="{% static 'ideaWeb/js/jquery.easings.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'ideaWeb/js/jquery.fullPage.min.js' %}"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('#fullpage').fullpage({
+				controlArrows: false,
+				sectionsColor: ['#000000', '#1bbc9b','#7BAABE', 'whitesmoke', '#ccddff'],
+				anchors: ['firstPage'],
+				menu: '#menu',
+				css3: true,
+				scrollingSpeed: 1000
+			});
+		});
+	</script>
 	<title></title>
 </head>
 <body>
-	<div id="mynetwork"></div>
-	<div class="col-lg-6" id="searchBar">
-	    <div class="input-group">
-	      <span class="input-group-btn">
-	        <button id="clicker" class="btn btn-default" type="button">Go!</button>
-	      </span>
-	      <input id="search" type="text" class="form-control" placeholder="Search for...">
-	    </div><!-- /input-group -->
-	</div><!-- /.col-lg-6 -->
+<div id="fullpage">
+	<div class="section" id="section1">
+		<div class="slide active" id='introPage'>
+			<center ><img id='pageHeader' src="{% static 'ideaWeb/Pictures/Final.png' %}"/>
+				<p id ='intro'>Welcome to IdeaWeb, the website where subjects come alive.</p>
+				<div width='200px'>
+				<ul id='instructions'>
+					<li>Search for a subject in the search bar</li>
+					<li>Drag the bubbles to create more</li>
+					<li>Double click bubbles to read more</li>
+					<li>Have Fun!</li>
+				</ul>
+				</div>
+				<a class="btn btn-default" href="#firstPage/1" role="button">Continue</a>
 
-	
-	<div id="displayBlock">
-		
-		<iframe frameborder="1" id ="showWiki"></iframe>
-		<center><img id='loader' src="{% static 'ideaWeb/Pictures/Preloader_2.gif' %}"></center>
-		<button id='back' type="button" class="btn btn-default" aria-label="Left Align">
-	  		<span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span >  Back
-		</button>
+			</center>
+			
+		</div>
+		<div class="slide">
+			<div id="mynetwork"></div>
+			<div class="col-lg-6" id="searchBar">
+			    <div class="input-group">
+			      <span class="input-group-btn">
+			        <button id="clicker" class="btn btn-default" type="button">Go!</button>
+			      </span>
+			      <input id="search" type="text" class="form-control" placeholder="Search for...">
+			    </div><!-- /input-group -->
+			</div><!-- /.col-lg-6 -->
+		</div>
+		<div class="slide" id="page2" width='100%' height='100%'>			
+				<iframe frameborder="0" id ="showWiki"></iframe>
+				<button id='back' type="button" class="btn btn-default" aria-label="Left Align">
+			  		<span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span >  Back
+				</button>
+		</div>
 	</div>
-		
 	<!--<input type="text" id="search" name="search">Search!</input>-->
 	<!--<button id="clicker">Submit</button>-->
-    
+</div>
 </body>
 <style type="text/css">
 	html,body{ margin:0; padding:0; height:100%; width:100%; overflow: hidden;}
+	#introPage{
+		position: relative;
+		opacity: 1.0;
+	}
+	#introPage::after {
+	  content: "";
+	  background: url({% static 'ideaWeb/Pictures/welcomeToTheIdeaWeb.png'%});
+	  -webkit-background-size: cover;
+	  -moz-background-size: cover;
+	  -o-background-size: cover;
+	  background-size: cover;
+	  opacity: 0.4;
+	  top: 0;
+	  left: 0;
+	  bottom: 0;
+	  right: 0;
+	  position: absolute;
+	  z-index: -1;   
+	}
+	#instructions{
+		font-family: 'Arvo', serif; 
+		font-size: 18px; 
+		list-style-type: square;
+		color: white;
+	}
+	#instructions li{
+		width: 400px;
+	}
+	#intro{
+		color: white;
+		font-family: 'Arvo', serif;
+		font-size: 25px;
+		width: 700px;
+	}
+	#pageHeader{
+		position: relative;
+		top: 0px;
+		width: 50%;
+		height: 50%;
+	}
 	#mynetwork{
-		position: absolute;
 	    width: 100%;
 	    height: 100%;
 	    left: 0;
 	    top: 0;
+	    background: black;
 	    display: inline-block;
 	}
 	#loader{
 		position: absolute;
-		top: 5%;
+		top: 20px;
 	}
 	#searchBar{
 		position: absolute;
@@ -60,30 +125,34 @@
 		top: 50px;
 		width: 20%;
 	}
-	#displayBlock{
+	.slide{
 		position: relative;
-		left: 100%;
-		width: 100%;
-		height: 100%;
 	}
-	#showWiki{
-		position: inherit;
+	iframe{
 		width: 100%;
 		height: 100%;
 		background: white;
+		border: 2px black solid; 
 	}
 	#back{
 		position: absolute;
+		top: 50px;
 		left: 50px;
-		top: 10px;
 		width: 8%;
 		border: solid black 2px;
 	}
 </style>
 <script type="text/javascript">
+	$("#search").keyup(function(event){
+	    if(event.keyCode == 13){
+	        $("#clicker").click();
+	        $('#search').blur();
+	    }
+	});
 	$("#back").click(function(){
-		$( "#displayBlock" ).animate({'left':'100%'}, "slow", function() {$("#loader").css({'opacity': 1})});
+		window.location.replace('#firstPage/1')
 	})
+	var baseUrl = window.location.href
 	var nodes = new vis.DataSet([])
 	var edges = new vis.DataSet([])
 	var network
@@ -171,10 +240,11 @@
 		    	newNodeData = nodes.get(Number(params['nodes']))
 		    	network.focus(Number(params['nodes']),{animation : true})
 		    	$("#showWiki").attr({'src':'about:blank'})
-			    	$( "#displayBlock" ).animate({'left':0}, "slow", function() {
-			    		$("#loader").css({'opacity': 0})
-				    	$("#showWiki").attr({'src':'https://en.wikipedia.org/wiki/'+newNodeData['label']}) 
-				  });
+			    $("#loader").css({'opacity': 0})
+		    	$("#showWiki").attr({'src':'https://en.wikipedia.org/wiki/'+newNodeData['label']}) 
+		    	window.location.replace('#firstPage/2')
+		    	
+				
 	    	}
 	    })
 	}
