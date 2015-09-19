@@ -1,5 +1,5 @@
 webIp = '104.131.67.157'; port = 40000
-
+col = Connect.connect('wikiGraph','articleNodesTest','104.131.67.157',40000)
 ***** = DONE
 ; = In Progress
 
@@ -14,7 +14,8 @@ Work-List:
 		-Host project on heroku;
 		-Fix new HTTP issue (missing page crash);
 		-Fix SearchBar highlighting issue;
-
+		-Fix json serving error
+		-Create Intro Page
 	THINK ABOUT
 		-Fix link limit issue;
 		-Possibly switch from MediaWikiApi;

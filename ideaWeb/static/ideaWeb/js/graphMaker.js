@@ -1,4 +1,4 @@
-	var nodes = new vis.DataSet([])
+var nodes = new vis.DataSet([])
 	var edges = new vis.DataSet([])
 	var network
 	var container
@@ -7,19 +7,14 @@
 	var extensions = []
 	var totalNodes = {}
 	var min = 10
-	$("#search").focus(function(){
-		$("#searchBar").css({'opacity': '1','transition': 'opacity 0.5s linear'});
-	});
-	$("#search").focusout(function(){
-		$("#searchBar").css({'opacity': '0.1','transition': 'opacity 0.5s linear'});
-	});
+	
 	$("#clicker").click(function(){
 		$.ajax({
 		  data: {'q':$('#search').val()},
 		  url: "/ideaWeb/ajax/",
 		}).done(function(result) {
 		  generateGraph(result)
-	});
+		});
 	});
 	function generateGraph(result){
 		info = JSON.parse(result)
@@ -85,10 +80,11 @@
 		    	newNodeData = nodes.get(Number(params['nodes']))
 		    	network.focus(Number(params['nodes']),{animation : true})
 		    	$("#showWiki").attr({'src':'about:blank'})
-			    	$( "#displayBlock" ).animate({'left':0}, "slow", function() {
-			    		$("#loader").css({'opacity': 0})
-				    	$("#showWiki").attr({'src':'https://en.wikipedia.org/wiki/'+newNodeData['label']}) 
-				  });
+			    $("#loader").css({'opacity': 0})
+		    	$("#showWiki").attr({'src':'https://en.wikipedia.org/wiki/'+newNodeData['label']}) 
+		    	window.location.replace('#firstPage/2')
+		    	
+				
 	    	}
 	    })
 	}
