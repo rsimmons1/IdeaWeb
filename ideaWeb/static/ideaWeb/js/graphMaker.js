@@ -1,4 +1,4 @@
-var nodes = new vis.DataSet([])
+	var nodes = new vis.DataSet([])
 	var edges = new vis.DataSet([])
 	var network
 	var container
@@ -7,7 +7,8 @@ var nodes = new vis.DataSet([])
 	var extensions = []
 	var totalNodes = {}
 	var min = 10
-	
+	var branchSize = 5
+	var largeText = 80
 	$("#clicker").click(function(){
 		$.ajax({
 		  data: {'q':$('#search').val()},
@@ -16,6 +17,52 @@ var nodes = new vis.DataSet([])
 		  generateGraph(result)
 		});
 	});
+	$("#branch").click(function(){
+		for (var i = 2; i <= nodeTotal; i++) {
+			setTimeout((function(){
+				var TnodeData = nodes.get(i);
+				if(!isInArray(TnodeData['label'].toUpperCase(),extensions)){
+				    $.ajax({
+					  data: {'q':TnodeData['label']},
+					  url: "/ideaWeb/ajax/",
+					  success: (function(result) {
+								var info = JSON.parse(result)
+							  	branch(info,TnodeData,branchSize) })
+					})
+				}
+			})(), 20000)
+			
+		}
+	})
+	function biggestNodes(){
+		var nodeMax = 0
+		var biggestNode = []
+		var nodeIndex = 0
+		var nodeId = 0
+		for (var i=1; i < branchSize+1; i++){
+			nodeId = 0
+			nodeMax = 80
+			nodeIndex = 0
+			var groupNodes = nodes.get({
+				filter: function (item) {
+					return item.group == i;
+				}
+			});
+			for(var j = 0; j <groupNodes.length; j++){
+				if(groupNodes[j]['size'] > nodeMax){
+					nodeIndex = j
+					nodeId = groupNodes[j]['id']
+					nodes.update({id: groupNodes[j]['id'],font:{size:largeText},scaling:{label:{min:40,max:200}}})
+				}
+				else{
+					nodes.update({id: groupNodes[j]['id'],font:{size:32}})
+				}
+			}
+			biggestNode.push(groupNodes[nodeIndex])
+			
+		}
+		
+	}
 	function generateGraph(result){
 		info = JSON.parse(result)
 		var nodeArray = []
@@ -25,11 +72,11 @@ var nodes = new vis.DataSet([])
 		nodeTotal = 1
 		nodes = new vis.DataSet(nodeArray);
 		edges = new vis.DataSet(edgeArray);
-		nodes.add({id: 0, label: info.title,size: 75,group:0})
+		nodes.add({id: 0, label: info.title,size: 75,group:0,font:{size:largeText}})
 		totalNodes[info.title.toUpperCase()] = 0
-		max = nodes.get(0)['size']
+		max = 600
 		extensions.push(info.save)
-		branch(info,nodes.get(0),5)		
+		branch(info,nodes.get(0),branchSize)		
 		container = document.getElementById('mynetwork');
 		var data = {
 		nodes: nodes,
@@ -39,6 +86,11 @@ var nodes = new vis.DataSet([])
 		//Network Options
 
 		var options = {
+			physics: {
+				barnesHut: {
+					avoidOverlap: 0.1,
+				}
+			},
 			nodes: {
 				mass: 3.5,
 			    shape: 'dot',
@@ -46,9 +98,17 @@ var nodes = new vis.DataSet([])
 			        size: 32,
 			        color: '#ffffff'
 			    },
-			    borderWidth: 2
+			    borderWidth: 2,
+			    scaling:{
+			    	label:{drawThreshold: 10,}
+			    }
 			},
 			edges: {
+				arrows: {
+			      to:     {enabled: false, scaleFactor:1},
+			      middle: {enabled: false, scaleFactor:1},
+			      from:   {enabled: true, scaleFactor:0.5}
+			    },
 			    width: 5,
 			    physics: true,
 			    scaling:{
@@ -66,16 +126,18 @@ var nodes = new vis.DataSet([])
 		network.on("dragEnd", function (params) {
 	        params.event = "[original event]";
 	        nodeData = nodes.get(Number(params['nodes']))
+
 	        if(!isInArray(nodeData['label'].toUpperCase(),extensions)){
 			    $.ajax({
 				  data: {'q':nodeData['label']},
 				  url: "/ideaWeb/ajax/",
 				}).done(function(result) {
-				  	branch(info = JSON.parse(result),nodeData,5)
+				  	branch(info = JSON.parse(result),nodeData,branchSize)
 				});
 			}
 	    });
 	    network.on("doubleClick",function(params){
+	    	
 	    	if(params['nodes'].length != 0){
 		    	newNodeData = nodes.get(Number(params['nodes']))
 		    	network.focus(Number(params['nodes']),{animation : true})
@@ -106,21 +168,27 @@ var nodes = new vis.DataSet([])
 			}
 		}
 		for (var i = 0; i < size; i++){
-			nodeTotal++
 			if(!totalNodes.hasOwnProperty(newNodes.edges[i][0].toUpperCase()) ){
+				nodeTotal++
 				totalNodes[newNodes.edges[i][0].toUpperCase()] = nodeTotal
 				nodeArray.push({id: nodeTotal,label:newNodes.edges[i][0], size: 15, group:groups[i]})
 				edgeArray.push({from:nodeTotal, to: Number(root['id'])})
 			}
 			else{
 				node = totalNodes[newNodes.edges[i][0].toUpperCase()]
-				nodes.update({id: node, size: limit(nodes.get(node)['size'] + 20,max,initialSize)})
-				edges.add({from: Number(root['id']), to: node})
+				if (nodes.get(node)['size'] + 20 > 80){
+					nodes.update({id: node, font:{size:largeText},size: limit(nodes.get(node)['size'] + 20,max,initialSize)})
+				}
+				else{
+					nodes.update({id: node, size: limit(nodes.get(node)['size'] + 20,max,initialSize)})
+					edges.add({from: node, to: Number(root['id'])})
+				}
 			}
 		}
 		nodes.add(nodeArray)
 		edges.add(edgeArray)
 		extensions.push(root['label'].toUpperCase())
+		
 	}
 	function limit(num,max,min){
 		if(num > max){
