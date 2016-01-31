@@ -9,6 +9,7 @@
 	var min = 10
 	var branchSize = 5
 	var largeText = 80
+	var selectedNode = 0
 	$("#clicker").click(function(){
 		$.ajax({
 		  data: {'q':$('#search').val()},
@@ -18,9 +19,13 @@
 		});
 	});
 	$("#branch").click(function(){
-		for (var i = 2; i <= nodeTotal; i++) {
-			setTimeout((function(){
-				var TnodeData = nodes.get(i);
+		var nodeGroup = nodes.get(selectedNode)['group']
+		var expNode = [selectedNode]
+		var items = network.getConnectedNodes(selectedNode.toString())
+		items = items.concat(expNode)
+		items.forEach(function(n){
+			(function(){
+				var TnodeData = nodes.get(n);
 				if(!isInArray(TnodeData['label'].toUpperCase(),extensions)){
 				    $.ajax({
 					  data: {'q':TnodeData['label']},
@@ -30,9 +35,9 @@
 							  	branch(info,TnodeData,branchSize) })
 					})
 				}
-			})(), 20000)
+			})()
 			
-		}
+		})
 	})
 	function biggestNodes(){
 		var nodeMax = 0
@@ -136,6 +141,9 @@
 				});
 			}
 	    });
+	    network.on("select",function(params){
+	    	selectedNode = Number(params['nodes'])
+	    })
 	    network.on("doubleClick",function(params){
 	    	
 	    	if(params['nodes'].length != 0){

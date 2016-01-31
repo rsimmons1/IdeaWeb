@@ -6,7 +6,13 @@ import Connect
 import sys
 import httplib
 import random
+import urllib
+
 collection = Connect.connect('wikiGraph','articleNodesTest','104.131.67.157',40000)
+def wikiConnect(article):
+	data = urllib.urlopen('https://en.wikipedia.org/wiki/'+article)
+	return data.read()
+	
 def connArticle(word):
 		url2 = 'https://en.wikipedia.org/w/api.php?action=query&prop=extracts|links&format=json&explaintext=&pllimit=max&titles='+word+'&redirects='
 		r = requests.get(url2)
@@ -176,7 +182,7 @@ def getArticle(name,articleList):
 def makeNode(initialNode,depth=None):
 	searchList = []
 	for query in initialNode['edges'][:depth]:
-		if  not bool(collection.find_one({'save': query[0].upper()})):
+		if not bool(collection.find_one({'save': query[0].upper()})):
 			# print query[0]
 			searchList.append(query[0])
 	articles = linkHandler(searchList)
