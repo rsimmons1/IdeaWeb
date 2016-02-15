@@ -13,7 +13,7 @@
 	$("#clicker").click(function(){
 		$.ajax({
 		  data: {'q':$('#search').val()},
-		  url: "/ideaWeb/ajax/",
+		  url: "/ajax/",
 		}).done(function(result) {
 		  generateGraph(result)
 		});
@@ -29,7 +29,7 @@
 				if(!isInArray(TnodeData['label'].toUpperCase(),extensions)){
 				    $.ajax({
 					  data: {'q':TnodeData['label']},
-					  url: "/ideaWeb/ajax/",
+					  url: "/ajax/",
 					  success: (function(result) {
 								var info = JSON.parse(result)
 							  	branch(info,TnodeData,branchSize) })
@@ -135,7 +135,7 @@
 	        if(!isInArray(nodeData['label'].toUpperCase(),extensions)){
 			    $.ajax({
 				  data: {'q':nodeData['label']},
-				  url: "/ideaWeb/ajax/",
+				  url: "/ajax/",
 				}).done(function(result) {
 				  	branch(info = JSON.parse(result),nodeData,branchSize)
 				});
