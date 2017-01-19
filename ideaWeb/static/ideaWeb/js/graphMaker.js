@@ -77,7 +77,7 @@
 		nodeTotal = 1
 		nodes = new vis.DataSet(nodeArray);
 		edges = new vis.DataSet(edgeArray);
-		nodes.add({id: 0, label: info.title,size: 115,group:0,font:{size:largeText}})
+		nodes.add({id: 0, label: info.title,size: 75,group:0,font:{size:largeText}})
 		totalNodes[info.title.toUpperCase()] = 0
 		max = 600
 		extensions.push(info.save)
@@ -148,7 +148,6 @@
 	    	
 	    	if(params['nodes'].length != 0){
 		    	newNodeData = nodes.get(Number(params['nodes']))
-		    	network.focus(Number(params['nodes']),{animation : true})
 		    	$("#showWiki").attr({'src':'about:blank'})
 			    $("#loader").css({'opacity': 0})
 		    	$("#showWiki").attr({'src':'https://en.wikipedia.org/wiki/'+newNodeData['label']}) 
@@ -179,12 +178,12 @@
 			if(!totalNodes.hasOwnProperty(newNodes.edges[i][0].toUpperCase()) ){
 				nodeTotal++
 				totalNodes[newNodes.edges[i][0].toUpperCase()] = nodeTotal
-				nodeArray.push({id: nodeTotal,label:newNodes.edges[i][0], size: 15, group:groups[i]})
+				nodeArray.push({id: nodeTotal,label:newNodes.edges[i][0], size: 55, group:groups[i]})
 				edgeArray.push({from:nodeTotal, to: Number(root['id'])})
 			}
 			else{
 				node = totalNodes[newNodes.edges[i][0].toUpperCase()]
-				if (nodes.get(node)['size'] + 20 > 80){
+				if (nodes.get(node)['size'] + 20 > 70){
 					nodes.update({id: node, font:{size:largeText},size: limit(nodes.get(node)['size'] + 20,max,initialSize)})
 				}
 				else{
