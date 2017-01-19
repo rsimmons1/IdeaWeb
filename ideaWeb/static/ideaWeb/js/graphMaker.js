@@ -77,7 +77,7 @@
 		nodeTotal = 1
 		nodes = new vis.DataSet(nodeArray);
 		edges = new vis.DataSet(edgeArray);
-		nodes.add({id: 0, label: info.title,size: 75,group:0,font:{size:largeText}})
+		nodes.add({id: 0, label: info.title,size: 115,group:0,font:{size:largeText}})
 		totalNodes[info.title.toUpperCase()] = 0
 		max = 600
 		extensions.push(info.save)
