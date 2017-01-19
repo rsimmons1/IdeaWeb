@@ -1,5 +1,3 @@
-$.fn.fullpage.setAllowScrolling(false);
-
 $("#back").click(function(){
 		window.location.replace('#firstPage/1')
 })
