@@ -14,3 +14,7 @@ $("#search").keyup(function(event){
 	        $('#search').blur();
 	    }
 });
+
+$(document).ready(function(){
+	$.fn.fullpage.setAllowScrolling(false);
+});
