@@ -178,12 +178,12 @@
 			if(!totalNodes.hasOwnProperty(newNodes.edges[i][0].toUpperCase()) ){
 				nodeTotal++
 				totalNodes[newNodes.edges[i][0].toUpperCase()] = nodeTotal
-				nodeArray.push({id: nodeTotal,label:newNodes.edges[i][0], size: 55, group:groups[i]})
+				nodeArray.push({id: nodeTotal,label:newNodes.edges[i][0], size: 35, group:groups[i]})
 				edgeArray.push({from:nodeTotal, to: Number(root['id'])})
 			}
 			else{
 				node = totalNodes[newNodes.edges[i][0].toUpperCase()]
-				if (nodes.get(node)['size'] + 20 > 70){
+				if (nodes.get(node)['size'] + 20 > 80){
 					nodes.update({id: node, font:{size:largeText},size: limit(nodes.get(node)['size'] + 20,max,initialSize)})
 				}
 				else{
