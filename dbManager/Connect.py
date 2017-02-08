@@ -2,9 +2,10 @@
 from pymongo import MongoClient
 from collections import deque
 def connect(dbName,colName,website=None,port=None):
-	client = MongoClient(website,port)
-	db = client[dbName]
-	return db[colName]
+	uri = 'mongodb://rees:a43ff155@ds145639.mlab.com:45639/heroku_td8hc30x'
+	client = MongoClient(uri)
+	db = client["heroku_td8hc30x"]
+	return db["articleNodesTest"]
 
 def neighbors(node,depth=5):
 	return map(lambda x: x[0],node['edges'][:depth])
